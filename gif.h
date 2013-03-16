@@ -14,6 +14,8 @@ public:
 private:
     Gif();
 
+    void writeColourTable(BinaryWriter *file);
+    void writeImage(BinaryWriter *file);
 
     uint16_t width;
     uint16_t height;

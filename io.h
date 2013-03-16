@@ -8,8 +8,14 @@ class BinaryWriter
 {
 public:
     BinaryWriter(const std::string &filename);
+    ~BinaryWriter();
     void writeCharacters(const std::string &characters);
     void writeUInt16(uint16_t val);
+    void writeUInt8(uint8_t val);
+
+    void write(const void *ptr, uint32_t size, uint32_t count = 1);
+private:
+    void *fh;
 };
 
 #endif
