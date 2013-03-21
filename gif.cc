@@ -8,6 +8,8 @@ Gif::Gif()
 Gif *Gif::LoadFromPixels(const uint8_t *data, uint16_t width, uint16_t height)
 {
     Gif *gif = new Gif();
+    gif->width = width;
+    gif->height = height;
     return gif;
 }
 
@@ -78,4 +80,7 @@ void Gif::writeImage(BinaryWriter *file)
     flags |= local_table_size;
 
     file->writeUInt8(flags);
+
+    uint32_t data[] = {0x100, 0x28, 0xff, 0xff, 0xff, 0xff, 0x101};
+    file->writeStream(data, 7, 9);
 }
