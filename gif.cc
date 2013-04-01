@@ -11,8 +11,8 @@ Gif::Gif()
 Gif *Gif::LoadFromPixels(const uint8_t *data, uint16_t width, uint16_t height)
 {
     Gif *gif = new Gif();
-    gif->width = width;
-    gif->height = height;
+    gif->width = 10;
+    gif->height = 10;
     return gif;
 }
 
@@ -23,9 +23,9 @@ void Gif::write(BinaryWriter *file)
     file->writeUInt16(height);
 
     uint8_t global_colour_table = 1;
-    uint8_t colour_resolution = 7;
+    uint8_t colour_resolution = 1;
     uint8_t sort = 0;
-    uint8_t colour_table_size = 7;
+    colour_table_size = 1;
 
     uint8_t flags = 0;
     flags |= global_colour_table << 7;
@@ -43,6 +43,15 @@ void Gif::write(BinaryWriter *file)
 
     writeColourTable(file);
 
+    file->writeUInt8(0x21);
+    file->writeUInt8(0xf9);
+    file->writeUInt8(0x04);
+    file->writeUInt8(0x00);
+    file->writeUInt8(0x00);
+    file->writeUInt8(0x00);
+    file->writeUInt8(0x00);
+    file->writeUInt8(0x00);
+
     writeImage(file);
 
     file->writeUInt8(0x3b);
@@ -51,11 +60,27 @@ void Gif::write(BinaryWriter *file)
 
 void Gif::writeColourTable(BinaryWriter *file)
 {
-    for (int i = 0; i < 256; ++i) {
-        file->writeUInt8(0);
-        file->writeUInt8(0);
-        file->writeUInt8(0);
-    }
+    int size = 2 << colour_table_size;
+    file->writeUInt8(255);
+    file->writeUInt8(255);
+    file->writeUInt8(255);
+
+    file->writeUInt8(0);
+    file->writeUInt8(0);
+    file->writeUInt8(255);
+
+    file->writeUInt8(255);
+    file->writeUInt8(0);
+    file->writeUInt8(0);
+
+    file->writeUInt8(0);
+    file->writeUInt8(0);
+    file->writeUInt8(0);
+/*    for (int i = 0; i < size; ++i) {
+        file->writeUInt8(255);
+        file->writeUInt8(255);
+        file->writeUInt8(255);
+    }*/
 }
 
 int search_table(std::vector<std::vector<uint32_t>> &table,
@@ -109,9 +134,24 @@ void Gif::writeImage(BinaryWriter *file)
 
     file->writeUInt8(flags);
 
-    uint32_t data[] = {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2};
+    uint32_t data[] = {
+1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+1, 1, 1, 0, 0, 0, 0, 2, 2, 2,
+1, 1, 1, 0, 0, 0, 0, 2, 2, 2,
+2, 2, 2, 0, 0, 0, 0, 1, 1, 1,
+2, 2, 2, 0, 0, 0, 0, 1, 1, 1,
+2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
+2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
+2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
+};
+
+    file->writeUInt8(2);
+
+    int num_colours = 2 << (colour_table_size);
     std::vector<std::vector<uint32_t>> table;
-    for (int i = 0; i < 255; ++i) {
+    for (int i = 0; i < num_colours; ++i) {
        std::vector<uint32_t> val;
        val.push_back(i);
        table.push_back(val);
@@ -124,8 +164,8 @@ void Gif::writeImage(BinaryWriter *file)
     int i = 0;
 
     std::vector<uint32_t> out;
-    out.push_back(256);
-    while (i < 4) {
+    out.push_back(num_colours);
+    while (i < 100) {
         uint32_t k = data[i];
         std::vector<uint32_t> ck = c;
         ck.push_back(k);
@@ -135,6 +175,7 @@ void Gif::writeImage(BinaryWriter *file)
         } else {
             table.push_back(ck);
             pos = search_table(table, c);
+            //printf("#%d\n", pos);
             out.push_back(pos);
             c.clear();
             c.push_back(k);
@@ -145,8 +186,14 @@ void Gif::writeImage(BinaryWriter *file)
         int pos = search_table(table, c);
         out.push_back(pos);
     }
-    out.push_back(257);
+    out.push_back(num_colours + 1);
 
+    int outsize = out.size();
+    for (int i = 0; i < outsize; ++i) {
+        //printf("#%d\n", out[i]);
+    }
 
-    file->writeStream(out, 9);
+    file->writeUInt8(13);
+    file->writeStream(out, 3);
+    file->writeUInt8(0);
 }
