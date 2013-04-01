@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <vector>
 
 class BinaryWriter
 {
@@ -12,7 +13,7 @@ public:
     void writeCharacters(const std::string &characters);
     void writeUInt16(uint16_t val);
     void writeUInt8(uint8_t val);
-    void writeStream(const uint32_t *data, uint32_t count, uint32_t bits);
+    void writeStream(const std::vector<uint32_t> &data, uint32_t bits);
 
     void write(const void *ptr, uint32_t size, uint32_t count = 1);
 private:

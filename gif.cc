@@ -111,7 +111,7 @@ void Gif::writeImage(BinaryWriter *file)
 
     uint32_t data[] = {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2};
     std::vector<std::vector<uint32_t>> table;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 255; ++i) {
        std::vector<uint32_t> val;
        val.push_back(i);
        table.push_back(val);
@@ -122,7 +122,10 @@ void Gif::writeImage(BinaryWriter *file)
 
     std::vector<uint32_t> c;
     int i = 0;
-    while (i < 20) {
+
+    std::vector<uint32_t> out;
+    out.push_back(256);
+    while (i < 4) {
         uint32_t k = data[i];
         std::vector<uint32_t> ck = c;
         ck.push_back(k);
@@ -132,13 +135,18 @@ void Gif::writeImage(BinaryWriter *file)
         } else {
             table.push_back(ck);
             pos = search_table(table, c);
-            printf("#%d ", pos);
+            out.push_back(pos);
             c.clear();
             c.push_back(k);
         }
         ++i;
     }
+    if (c.size() != 1) {
+        int pos = search_table(table, c);
+        out.push_back(pos);
+    }
+    out.push_back(257);
 
 
-    //file->writeStream(data, 7, 9);
+    file->writeStream(out, 9);
 }

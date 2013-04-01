@@ -35,12 +35,12 @@ void BinaryWriter::writeUInt8(uint8_t val)
     write(&val, 1);
 }
 
-void BinaryWriter::writeStream(const uint32_t *data, uint32_t count,
-                               uint32_t bits)
+void BinaryWriter::writeStream(const std::vector<uint32_t> &data, uint32_t bits)
 {
     uint8_t out = 0;
     uint8_t out_bit = 0;
     uint8_t in_bit = 0;
+    uint32_t count = data.size();
     for (int i = 0; i < count; ++i) {
         uint32_t d = data[i];
         for (int j = 0; j < bits; ++j) {
