@@ -1,6 +1,9 @@
 #include "gif.h"
 #include "io.h"
 
+#include <vector>
+#include <cstdio>
+
 Gif::Gif()
 {
 }
@@ -55,6 +58,31 @@ void Gif::writeColourTable(BinaryWriter *file)
     }
 }
 
+int search_table(std::vector<std::vector<uint32_t>> &table,
+                 std::vector<uint32_t> &ck)
+{
+    int size = table.size();
+    for (int i = 0; i < size; ++i) {
+        int s = table[i].size();
+        if (s != ck.size()) {
+            continue;
+        }
+        bool good = true;
+        for (int y = 0; y < s; ++y) {
+            uint32_t val1 = table[i][y];
+            uint32_t val2 = ck[y];
+            if (val1 != val2) {
+                good = false;
+                break;
+            }
+        }
+        if (good) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void Gif::writeImage(BinaryWriter *file)
 {
     //Image Seperator
@@ -81,6 +109,36 @@ void Gif::writeImage(BinaryWriter *file)
 
     file->writeUInt8(flags);
 
-    uint32_t data[] = {0x100, 0x28, 0xff, 0xff, 0xff, 0xff, 0x101};
-    file->writeStream(data, 7, 9);
+    uint32_t data[] = {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2};
+    std::vector<std::vector<uint32_t>> table;
+    for (int i = 0; i < 4; ++i) {
+       std::vector<uint32_t> val;
+       val.push_back(i);
+       table.push_back(val);
+    }
+    std::vector<uint32_t> a;
+    table.push_back(a);
+    table.push_back(a);
+
+    std::vector<uint32_t> c;
+    int i = 0;
+    while (i < 20) {
+        uint32_t k = data[i];
+        std::vector<uint32_t> ck = c;
+        ck.push_back(k);
+        int pos = search_table(table, ck);
+        if (pos != -1) {
+            c = ck;
+        } else {
+            table.push_back(ck);
+            pos = search_table(table, c);
+            printf("#%d ", pos);
+            c.clear();
+            c.push_back(k);
+        }
+        ++i;
+    }
+
+
+    //file->writeStream(data, 7, 9);
 }
