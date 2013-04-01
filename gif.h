@@ -2,6 +2,7 @@
 #define __GIF_H__
 
 #include <stdint.h>
+#include <vector>
 
 class BinaryWriter;
 
@@ -17,6 +18,12 @@ private:
     void writeColourTable(BinaryWriter *file);
     void writeImage(BinaryWriter *file);
 
+    void calculateData();
+
+    const uint8_t *data;
+
+    std::vector<uint32_t> colours;
+    std::vector<uint32_t> pixels;
     uint16_t width;
     uint16_t height;
     uint8_t colour_table_size;
