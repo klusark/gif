@@ -98,13 +98,27 @@ void Gif::write(BinaryWriter *file)
 void Gif::writeColourTable(BinaryWriter *file)
 {
     int size = 2 << colour_table_size;
-    file->writeUInt8(255);
-    file->writeUInt8(255);
-    file->writeUInt8(255);
+    int i = 0;
+    int num_colours = colours.size();
+    for (i = 0; i < num_colours; ++i) {
+        uint32_t colour = colours[i];
+        uint8_t val = 0;
+        val |= colour;
+        file->writeUInt8(val);
+        val = 0;
 
-    file->writeUInt8(0);
-    file->writeUInt8(0);
-    file->writeUInt8(255);
+        val |= colour >> 8;
+        file->writeUInt8(val);
+        val = 0;
+
+        val |= colour >> 16;
+        file->writeUInt8(val);
+    }
+    for (; i < size; ++i) {
+        file->writeUInt8(0);
+        file->writeUInt8(0);
+        file->writeUInt8(0);
+    }
 
     /*file->writeUInt8(255);
     file->writeUInt8(0);
