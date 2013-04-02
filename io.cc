@@ -55,4 +55,7 @@ void BinaryWriter::writeStream(const std::vector<uint32_t> &data,
             }
         }
     }
+    if (out != 0) {
+        writeUInt8(out);
+    }
 }

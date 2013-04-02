@@ -69,7 +69,7 @@ void Gif::write(BinaryWriter *file)
     file->writeUInt16(height);
 
     uint8_t global_colour_table = 1;
-    uint8_t colour_resolution = 1;
+    uint8_t colour_resolution = colour_table_size;
     uint8_t sort = 0;
     //colour_table_size = 1;
 
@@ -171,20 +171,7 @@ void Gif::writeImage(BinaryWriter *file)
 
     file->writeUInt8(flags);
 
-    /*uint32_t data[] = {
-1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
-1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
-1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
-1, 1, 1, 0, 0, 0, 0, 2, 2, 2,
-1, 1, 1, 0, 0, 0, 0, 2, 2, 2,
-2, 2, 2, 0, 0, 0, 0, 1, 1, 1,
-2, 2, 2, 0, 0, 0, 0, 1, 1, 1,
-2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
-2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
-2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
-};*/
 
-    file->writeUInt8(2);
 
     int num_colours = 2 << (colour_table_size);
     std::vector<std::vector<uint32_t>> table;
@@ -203,8 +190,14 @@ void Gif::writeImage(BinaryWriter *file)
     std::vector<uint32_t> out;
     std::vector<uint32_t> bits;
 
-    uint32_t bit = 3;
+    uint32_t bit = 1;
     uint32_t total = 0;
+
+    while (table.size() > ((1<<bit) + 1)) {
+        ++bit;
+    }
+
+    file->writeUInt8(bit);
 
     out.push_back(num_colours);
     bits.push_back(bit);
@@ -231,17 +224,26 @@ void Gif::writeImage(BinaryWriter *file)
         }
         ++i;
     }
-    if (c.size() != 1) {
+    //if (c.size() != 1) {
         int pos = search_table(table, c);
         out.push_back(pos);
         bits.push_back(bit);
         total += bit;
-    }
+    //}
     out.push_back(num_colours + 1);
     bits.push_back(bit);
     total += bit;
 
-    file->writeUInt8((total + 8)/8);
+    int outnum = out.size();
+    for (int i = 0; i < outnum; ++i) {
+        printf("#%d %d\n", out[i], bits[i]);
+    }
+
+    int block = total/8;
+    if ((total % 8) != 0) {
+        block += 1;
+    }
+    file->writeUInt8(block);
     file->writeStream(out, bits);
     file->writeUInt8(0);
 }

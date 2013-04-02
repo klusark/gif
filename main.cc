@@ -6,9 +6,13 @@
 
 int main()
 {
-    uint8_t data[] = {0,0,0, 255,255,255,255,255,255,0,0,0};
+    uint8_t data[] = {
+0,0,0, 255,255,255,0,0,0,
+255,255,255,0,0,0,255,255,255,
+0,0,0, 255,255,255,0,0,0
+};
 
-    Gif *gif = Gif::LoadFromPixels(data, 2, 2);
+    Gif *gif = Gif::LoadFromPixels(data, 3, 3);
     if (!gif) {
         std::cerr << "Could not load gif" << std::endl;
         return -1;
