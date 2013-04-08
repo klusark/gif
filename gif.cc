@@ -3,17 +3,22 @@
 
 #include <vector>
 #include <cstdio>
+#include <cstring>
 
 Gif::Gif()
 {
 }
 
-Gif *Gif::LoadFromPixels(const uint8_t *data, uint16_t width, uint16_t height)
+Gif *Gif::LoadFromPixels(const uint8_t **data, uint16_t width, uint16_t height)
 {
+    uint8_t *d = (uint8_t *)malloc(width*height*3);
+    for (int i = 0; i < height; ++i) {
+        memcpy(d+(height*i*3), data[i], width*3);
+    }
     Gif *gif = new Gif();
     gif->width = width;
     gif->height = height;
-    gif->data = data;
+    gif->data = d;
     return gif;
 }
 
