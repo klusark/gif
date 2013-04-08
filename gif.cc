@@ -94,14 +94,14 @@ void Gif::write(BinaryWriter *file)
 
     writeColourTable(file);
 
-    file->writeUInt8(0x21);
+    /*file->writeUInt8(0x21);
     file->writeUInt8(0xf9);
     file->writeUInt8(0x04);
     file->writeUInt8(0x00);
     file->writeUInt8(0x00);
     file->writeUInt8(0x00);
     file->writeUInt8(0x00);
-    file->writeUInt8(0x00);
+    file->writeUInt8(0x00);*/
 
 
     writeImage(file);
