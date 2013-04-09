@@ -218,6 +218,11 @@ void Gif::writeImage(BinaryWriter *file)
     out.push_back(num_colours);
     bits.push_back(bit);
     total += bit;
+
+    uint32_t start_bit = bit;
+
+    std::vector<std::vector<uint32_t>> table_begin = table;
+
     int num_pixel = pixels.size();
     for (int i = 0; i < num_pixel; ++i) {
         uint32_t k = pixels[i];
@@ -242,6 +247,12 @@ void Gif::writeImage(BinaryWriter *file)
             total += bit;
             c.clear();
             c.push_back(k);
+        }
+        if (table.size() > 4096) {
+            table = table_begin;
+            out.push_back(num_colours);
+            bits.push_back(bit);
+            bit = start_bit;
         }
     }
     //if (c.size() != 1) {
