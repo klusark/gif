@@ -202,7 +202,6 @@ void Gif::writeImage(BinaryWriter *file)
     table.push_back(a);
 
     std::vector<uint32_t> c;
-    int i = 0;
 
     std::vector<uint32_t> out;
     std::vector<uint32_t> bits;
@@ -220,13 +219,13 @@ void Gif::writeImage(BinaryWriter *file)
     bits.push_back(bit);
     total += bit;
     int num_pixel = pixels.size();
-    while (i < num_pixel) {
+    for (int i = 0; i < num_pixel; ++i) {
         uint32_t k = pixels[i];
         std::vector<uint32_t> ck = c;
         ck.push_back(k);
         int pos = search_table(table, ck);
         if (pos != -1) {
-            c = ck;
+            c.push_back(k);
         } else {
             table.push_back(ck);
             pos = search_table(table, c);
@@ -235,11 +234,15 @@ void Gif::writeImage(BinaryWriter *file)
             }
             out.push_back(pos);
             bits.push_back(bit);
+            if ((out.size() - 1) % 16 == 0) {
+                printf("\n%05x: ", out.size() - 1);
+            }
+            printf("%03x ", pos);
+            //printf("#%03d %03d %03d\n", pos, bit, table.size());
             total += bit;
             c.clear();
             c.push_back(k);
         }
-        ++i;
     }
     //if (c.size() != 1) {
         int pos = search_table(table, c);
