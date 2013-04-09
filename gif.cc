@@ -234,10 +234,10 @@ void Gif::writeImage(BinaryWriter *file)
             }
             out.push_back(pos);
             bits.push_back(bit);
-            if ((out.size() - 1) % 16 == 0) {
+            /*if ((out.size() - 1) % 16 == 0) {
                 printf("\n%05x: ", out.size() - 1);
-            }
-            printf("%03x ", pos);
+            }*/
+            //printf("%03x ", pos);
             //printf("#%03d %03d %03d\n", pos, bit, table.size());
             total += bit;
             c.clear();
@@ -263,7 +263,6 @@ void Gif::writeImage(BinaryWriter *file)
     if ((total % 8) != 0) {
         block += 1;
     }
-    file->writeUInt8(block);
-    file->writeStream(out, bits);
+    file->writeStream(out, bits, block);
     file->writeUInt8(0);
 }
