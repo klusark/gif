@@ -40,11 +40,11 @@ void BinaryWriter::writeStream(const std::vector<uint32_t> &data,
 {
     uint8_t out = 0;
     uint8_t out_bit = 0;
-    uint8_t in_bit = 0;
     uint32_t count = data.size();
-    for (int i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         uint32_t d = data[i];
-        for (int j = 0; j < bits[i]; ++j) {
+        uint32_t b = bits[i];
+        for (uint32_t j = 0; j < b; ++j) {
             uint32_t val = (d & (1 << j)) >> j;
             out |= (val << out_bit);
             ++out_bit;
