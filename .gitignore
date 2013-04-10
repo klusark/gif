@@ -4,3 +4,7 @@ Makefile
 cmake_install.cmake
 *.swp
 gif
+*.aux
+*.log
+*.pdf
+*.gz
