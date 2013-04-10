@@ -103,16 +103,18 @@ void Gif::write(BinaryWriter *file)
 
     writeColourTable(file);
 
-    /*file->writeUInt8(0x21);
-    file->writeUInt8(0xf9);
-    file->writeUInt8(0x04);
-    file->writeUInt8(0x00);
-    file->writeUInt8(0x00);
-    file->writeUInt8(0x00);
-    file->writeUInt8(0x00);
-    file->writeUInt8(0x00);*/
-
     int size = pixels.size();
+    if (size != 0) {
+        file->writeUInt8(0x21);
+        file->writeUInt8(0xff);
+        file->writeUInt8(0x0b);
+        file->writeCharacters("NETSCAPE2.0");
+        file->writeUInt8(0x03);
+        file->writeUInt8(0x01);
+        file->writeUInt8(0x00);
+        file->writeUInt8(0x00);
+        file->writeUInt8(0x00);
+    }
     for (int i = 0; i < size; ++i) {
         writeImage(file, i);
     }
@@ -175,6 +177,16 @@ int search_table(std::vector<std::vector<uint32_t>> &table,
 
 void Gif::writeImage(BinaryWriter *file, int img)
 {
+    file->writeUInt8(0x21);
+    file->writeUInt8(0xf9);
+    file->writeUInt8(0x04);
+    file->writeUInt8(0x04);
+    file->writeUInt8(0x32);
+    file->writeUInt8(0x00);
+    file->writeUInt8(0x00);
+    file->writeUInt8(0x00);
+
+
     //Image Seperator
     file->writeUInt8(0x2c);
 
@@ -290,5 +302,5 @@ void Gif::writeImage(BinaryWriter *file, int img)
         block += 1;
     }
     file->writeStream(out, bits, block);
-    file->writeUInt8(0);
+    //file->writeUInt8(0);
 }
