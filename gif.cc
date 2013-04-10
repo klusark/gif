@@ -22,7 +22,7 @@ void Gif::addFrame(const uint8_t **da)
 {
     uint8_t *d = (uint8_t *)malloc(width*height*3);
     for (int i = 0; i < height; ++i) {
-        memcpy(d+(height*i*3), da[i], width*3);
+        memcpy(d+(width*i*3), da[i], width*3);
     }
     data.push_back(d);
     std::vector<uint32_t> a;
