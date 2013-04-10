@@ -97,9 +97,9 @@ In this example eight 5 bit codes are being output from the LZW compression sche
 \subsection{Colour Tables}
 GIF uses a colour lookup table in order to provide colour to images. There is a global colour table for the entire image, but each sub image can optionally include it's own colour table which would override the global colour table. The use of colour tables has a number of benefits over just encoding the colours straight into the image, but also a few drawbacks. The main advantage is the size of the image. Let's say that you have an image with only eight colours, if a colour table were not used you would have to include all the information for each colour every time it is used. With a colour table all you need to do is provide a number between 0 and 7. This has the added advantage that once compressed each pixel could use at most 3 bits with this table and using the data stream described earlier it will use very little space. The major disadvantage with using a colour table though, in the case of GIF, is that there is a maximum of 255 colours per table. This could mean that there are 255 colours for the entire image, if the encoder is not very good, or it could use a number of local colour tables for sub images, but that would be rather inefficient compared to just using a more modern format like PNG.
 \subsection{Multiple Images}
-
+GIF allows for multiple images to be in the single GIF file. This has a few different purposes. One, which I use, is animation, which I will expand upon in the next section. The other is using showing multiple different images on the screen at the same time in different locations. The GIF format specifies a logical screen in which the sub images must be contained. Each sub image may have it's own colour table as well. Each image is compressed separately, so a smart encoder could break the overall image into smaller chunks in order to maximize compression. For example, if the image is a bunch of coloured squares, there will probably be a better compression ratio using a single image for each square, but then there is a few bytes of overhead for each image, so it probably would not be worth it. 
 \subsection{Animation}
-
+Animation was added with GIF89a. The specification actually tells users not to use GIF for animation, but no one listens to that recommendation as these days GIF is used almost exclusively for animation. Because the spec does not want it to happen it does not describe the steps you need to take in order to make it happen. An application specific block needs to be included in the image in order to enable animation. This block must contain the text \texttt{"NETSCAPE2.0"} or the animation will not be played. I assume this is because the authors of the Netscape browser were the first ones to want to use GIF for animation and used their own extension to allow it. Now every browser supports playing these images, so it is easy to demonstrate an animation. 
 \section{The Code}
 I implemented GIF89a
 \subsection{Image Loading}
@@ -118,5 +118,8 @@ One of the main issues that my code has is the LZW compression related to the ta
 \subsection{Two Colours}
 There is a strange bug that happens when you try to encode an image with only two colours. I think I must have misunderstood something in the GIF89a specification as other tools which output GIF images seem to use a minimum of four colours in their output, even on an image with only two colours.
 
+
+%CITE THIS:
+%http://www.matthewflickinger.com/lab/whatsinagif/lzw_image_data.asp
 
 \end{document}
