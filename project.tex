@@ -100,8 +100,10 @@ GIF uses a colour lookup table in order to provide colour to images. There is a 
 GIF allows for multiple images to be in the single GIF file. This has a few different purposes. One, which I use, is animation, which I will expand upon in the next section. The other is using showing multiple different images on the screen at the same time in different locations. The GIF format specifies a logical screen in which the sub images must be contained. Each sub image may have it's own colour table as well. Each image is compressed separately, so a smart encoder could break the overall image into smaller chunks in order to maximize compression. For example, if the image is a bunch of coloured squares, there will probably be a better compression ratio using a single image for each square, but then there is a few bytes of overhead for each image, so it probably would not be worth it. 
 \subsection{Animation}
 Animation was added with GIF89a. The specification actually tells users not to use GIF for animation, but no one listens to that recommendation as these days GIF is used almost exclusively for animation. Because the spec does not want it to happen it does not describe the steps you need to take in order to make it happen. An application specific block needs to be included in the image in order to enable animation. This block must contain the text \texttt{"NETSCAPE2.0"} or the animation will not be played. I assume this is because the authors of the Netscape browser were the first ones to want to use GIF for animation and used their own extension to allow it. Now every browser supports playing these images, so it is easy to demonstrate an animation. 
+\subsection{Other Features of GIF}
+GIF had some optimizations in the format that were important back in the day were loading any image took time, but now that computers have gotten so fast these features do not make a different and just make it more complicated to implement. One feature is sorting the colour table in order of importance. This can let the decoder optimize for the colours which are used more. Another feature is interlacing. Back when connections were slow it made sense to interlace the image in order to make it look like it was loading faster to the user. Now that connections are a lot faster it does not make as much sense to implement interlacing.
 \section{The Code}
-I implemented GIF89a
+I implemented a GIF89a encoder. I could have made it output a GIF87a image in cases where animation isn't used just by changing the version tag, but I did not see any point doing that. This is what tools like GIMP do in that case. 
 \subsection{Image Loading}
 I needed some way of getting image data into the encoder. I obviously could not use GIF as it would then be harder to tell if I had actually written all the GIF code myself or just made calls to whatever library it was I was using to read the files. For this I used PNG.
 I also needed to be able to get multiple frames of data in order to do animation. For that I simply use the command line parameters to specify what each frame should be. If there is more than one frame I include animation extensions in the output GIF file.
@@ -110,13 +112,17 @@ The PNG image format is what I chose to read from to get my data. I made sure to
 \subsection{Binary Output}
 Because GIF is a binary format I needed a simple way to output binary data. I could have just used the c file api every time I wanted to write to a file, but that would have made the code a lot harder to read. Instead I wrote a simple abstraction around the c file api which just has support for exactly what is needed by the GIF format.
 \subsection{GIF}
-
+I implemented all the features needed for animation, but did not implement many of the features which are not required. Interlacing and colour table sorting were not implemented as they provide no advantage for animation. The GIF code has a few distinct sections. There is one function that makes list of all the colours for use in the colour table and creates a version of the image using the colour codes. This is applied for all the frames as they all use the same colour table. The writing code hard codes a bunch of values for things like setting interlacing and sorting. I have a table search function, which is not as well written as I would want but it works fine for simple images.
 \section{Issues}
 Because of the limited amount of time given for this assignment there are, unfortunately, still a few small outstanding issues with my code.
 \subsection{Speed}
 One of the main issues that my code has is the LZW compression related to the table search code is slower than it should be. There is certainly room to optimize this code if I had more time on this project. For a 1000 pixel by 1000 pixel image it can take a few seconds to encode on my computer, which is not really acceptable these days. Fortunately though, a smaller image, such as a 100 pixel by 100 pixel image is almost instant to encode.
 \subsection{Two Colours}
 There is a strange bug that happens when you try to encode an image with only two colours. I think I must have misunderstood something in the GIF89a specification as other tools which output GIF images seem to use a minimum of four colours in their output, even on an image with only two colours.
+\subsection{Input Images}
+Only PNG images may be loaded as I hard coded it to use the PNG library. In some cases I need to detect features of the PNG image in order to properly get the pixel data. This could be a problem if I missed a certain type of PNG image as it might not load correctly.
+\subsection{More than 255 Colours}
+
 
 
 %CITE THIS:
