@@ -259,6 +259,10 @@ void Gif::writeImage(BinaryWriter *file)
             bit = start_bit;
         }
     }
+    if (table.size() > (1<<bit)) {
+        ++bit;
+    }
+
     //if (c.size() != 1) {
         int pos = search_table(table, c);
         out.push_back(pos);
