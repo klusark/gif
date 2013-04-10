@@ -17,14 +17,14 @@ private:
     Gif();
 
     void writeColourTable(BinaryWriter *file);
-    void writeImage(BinaryWriter *file);
+    void writeImage(BinaryWriter *file, int img);
 
     void calculateData();
 
-    const uint8_t *data;
+    std::vector<const uint8_t *> data;
 
     std::vector<uint32_t> colours;
-    std::vector<uint32_t> pixels;
+    std::vector<std::vector<uint32_t>> pixels;
     uint16_t width;
     uint16_t height;
     uint8_t colour_table_size;

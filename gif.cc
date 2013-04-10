@@ -11,42 +11,47 @@ Gif::Gif()
 
 Gif *Gif::LoadFromPixels(const uint8_t **data, uint16_t width, uint16_t height)
 {
-    uint8_t *d = (uint8_t *)malloc(width*height*3);
-    for (int i = 0; i < height; ++i) {
-        memcpy(d+(height*i*3), data[i], width*3);
-    }
     Gif *gif = new Gif();
     gif->width = width;
     gif->height = height;
-    gif->data = d;
+    gif->addFrame(data);
     return gif;
 }
 
-void Gif::addFrame(const uint8_t **data)
+void Gif::addFrame(const uint8_t **da)
 {
+    uint8_t *d = (uint8_t *)malloc(width*height*3);
+    for (int i = 0; i < height; ++i) {
+        memcpy(d+(height*i*3), da[i], width*3);
+    }
+    data.push_back(d);
+    std::vector<uint32_t> a;
+    pixels.push_back(a);
 }
 
 void Gif::calculateData()
 {
     colours.clear();
     int size = width * height;
-    for (int i = 0; i < size; ++i) {
-        uint32_t pixel = 0;
-        pixel |= data[i * 3 + 0] << 0;
-        pixel |= data[i * 3 + 1] << 8;
-        pixel |= data[i * 3 + 2] << 16;
-        int s = colours.size();
-        bool found = false;
-        for (int y = 0; y < s; ++y) {
-            if (colours[y] == pixel) {
-                found = true;
-                pixels.push_back(y);
-                break;
+    for (int j = 0; j < data.size(); ++j) {
+        for (int i = 0; i < size; ++i) {
+            uint32_t pixel = 0;
+            pixel |= data[j][i * 3 + 0] << 0;
+            pixel |= data[j][i * 3 + 1] << 8;
+            pixel |= data[j][i * 3 + 2] << 16;
+            int s = colours.size();
+            bool found = false;
+            for (int y = 0; y < s; ++y) {
+                if (colours[y] == pixel) {
+                    found = true;
+                    pixels[j].push_back(y);
+                    break;
+                }
             }
-        }
-        if (found == false) {
-            pixels.push_back(colours.size());
-            colours.push_back(pixel);
+            if (found == false) {
+                pixels[j].push_back(colours.size());
+                colours.push_back(pixel);
+            }
         }
     }
     int tot = 0;
@@ -107,8 +112,10 @@ void Gif::write(BinaryWriter *file)
     file->writeUInt8(0x00);
     file->writeUInt8(0x00);*/
 
-
-    writeImage(file);
+    int size = pixels.size();
+    for (int i = 0; i < size; ++i) {
+        writeImage(file, i);
+    }
 
     file->writeUInt8(0x3b);
 
@@ -166,7 +173,7 @@ int search_table(std::vector<std::vector<uint32_t>> &table,
     return -1;
 }
 
-void Gif::writeImage(BinaryWriter *file)
+void Gif::writeImage(BinaryWriter *file, int img)
 {
     //Image Seperator
     file->writeUInt8(0x2c);
@@ -227,9 +234,9 @@ void Gif::writeImage(BinaryWriter *file)
 
     std::vector<std::vector<uint32_t>> table_begin = table;
 
-    int num_pixel = pixels.size();
+    int num_pixel = pixels[img].size();
     for (int i = 0; i < num_pixel; ++i) {
-        uint32_t k = pixels[i];
+        uint32_t k = pixels[img][i];
         std::vector<uint32_t> ck = c;
         ck.push_back(k);
         int pos = search_table(table, ck);
