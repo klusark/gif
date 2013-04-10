@@ -181,8 +181,8 @@ void Gif::writeImage(BinaryWriter *file, int img)
     file->writeUInt8(0xf9);
     file->writeUInt8(0x04);
     file->writeUInt8(0x04);
-    file->writeUInt8(0x32);
-    file->writeUInt8(0x00);
+    uint16_t frame_time = 50;
+    file->writeUInt16(frame_time);
     file->writeUInt8(0x00);
     file->writeUInt8(0x00);
 
