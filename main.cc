@@ -4,7 +4,14 @@
 #include <png.h>
 #include <iostream>
 
-Gif *read_png(const char *filename)
+struct PNG_Image
+{
+    const uint8_t **data;
+    uint16_t width;
+    uint16_t height;
+};
+
+PNG_Image load_png(const char *filename)
 {
     char header[8];
 
@@ -34,7 +41,7 @@ Gif *read_png(const char *filename)
     int width = png_get_image_width(png, info);
     int height = png_get_image_height(png, info);
     png_byte color_type = png_get_color_type(png, info);
-    png_byte bit_depth = png_get_bit_depth(png, info);
+    //png_byte bit_depth = png_get_bit_depth(png, info);
 
     if (color_type == PNG_COLOR_TYPE_PALETTE) {
         png_set_palette_to_rgb(png);
@@ -56,9 +63,12 @@ Gif *read_png(const char *filename)
     png_read_image(png, row_pointers);
 
     fclose(file);
+    PNG_Image img;
+    img.data = (const uint8_t **)row_pointers;
+    img.width = width;
+    img.height = height;
 
-    Gif *gif = Gif::LoadFromPixels((const uint8_t **)row_pointers, width, height);
-    return gif;
+    return img;
 }
 
 
@@ -69,11 +79,19 @@ int main(int argc, const char **argv)
     if (argc > 1) {
         in = argv[1];
     }
-    if (argc > 2) {
-        out = argv[2];
+    /*if (argc > 2) {
+        out = argv[argc-1];
+    }*/
+    PNG_Image img = load_png(in);
+    Gif *gif = Gif::LoadFromPixels(img.data, img.width, img.height);
+    for (int i = 2; i < argc; ++i) {
+        PNG_Image frame = load_png(argv[i]);
+        if (img.width != frame.width || img.height != frame.height) {
+            std::cerr << "Frame " << argv[i] << " wrong size" << std::endl;
+            return -1;
+        }
+        gif->addFrame(frame.data);
     }
-    Gif *gif = read_png(in);
-    //Gif *gif = Gif::LoadFromPixels(data, 10, 10);
     if (!gif) {
         std::cerr << "Could not load gif" << std::endl;
         return -1;

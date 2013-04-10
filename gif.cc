@@ -22,6 +22,10 @@ Gif *Gif::LoadFromPixels(const uint8_t **data, uint16_t width, uint16_t height)
     return gif;
 }
 
+void Gif::addFrame(const uint8_t **data)
+{
+}
+
 void Gif::calculateData()
 {
     colours.clear();
@@ -140,14 +144,14 @@ void Gif::writeColourTable(BinaryWriter *file)
 int search_table(std::vector<std::vector<uint32_t>> &table,
                  std::vector<uint32_t> &ck)
 {
-    int size = table.size();
-    for (int i = 0; i < size; ++i) {
-        int s = table[i].size();
+    uint32_t size = table.size();
+    for (uint32_t i = 0; i < size; ++i) {
+        uint32_t s = table[i].size();
         if (s != ck.size()) {
             continue;
         }
         bool good = true;
-        for (int y = 0; y < s; ++y) {
+        for (uint32_t y = 0; y < s; ++y) {
             uint32_t val1 = table[i][y];
             uint32_t val2 = ck[y];
             if (val1 != val2) {
